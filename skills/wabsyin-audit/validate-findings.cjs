@@ -601,16 +601,44 @@ function loadSchema(schemaPath) {
   return schema;
 }
 
+function isWindowsDeviceOrPipePath(filePath) {
+  if (typeof filePath !== "string" || filePath.length === 0) return true;
+  if (/^(?:\\\\\.\\|\\\\\?\\|\/\/\.\/|\/\/\?\/)/.test(filePath)) return true;
+  const baseName = path.win32.basename(filePath);
+  return WINDOWS_RESERVED_COMPONENT.test(baseName);
+}
+
 function readFileWithinLimit(file) {
   const noFollow = fs.constants.O_NOFOLLOW;
   const nonBlock = fs.constants.O_NONBLOCK;
-  if (!Number.isInteger(noFollow) || noFollow === 0 || !Number.isInteger(nonBlock) || nonBlock === 0) {
+  const hasPosixSafeOpen = Number.isInteger(noFollow) && noFollow !== 0 && Number.isInteger(nonBlock) && nonBlock !== 0;
+  if (!hasPosixSafeOpen && process.platform !== "win32") {
     throw new SafeInputError("OS no-follow and nonblocking input protection is unavailable");
+  }
+
+  let lstatBefore = null;
+  if (!hasPosixSafeOpen) {
+    if (isWindowsDeviceOrPipePath(file)) {
+      throw new SafeInputError("input must be a regular file");
+    }
+    lstatBefore = fs.lstatSync(file, { bigint: true });
+    if (lstatBefore.isSymbolicLink()) {
+      throw new SafeInputError("input must not be a symlink");
+    }
+    if (!lstatBefore.isFile()) {
+      throw new SafeInputError("input must be a regular file");
+    }
+    if (lstatBefore.size > BigInt(LIMITS.inputBytes)) {
+      throw new SafeInputError(`input exceeds ${LIMITS.inputBytes} byte limit`);
+    }
   }
 
   let descriptor;
   try {
-    descriptor = fs.openSync(file, fs.constants.O_RDONLY | noFollow | nonBlock);
+    descriptor = fs.openSync(
+      file,
+      hasPosixSafeOpen ? (fs.constants.O_RDONLY | noFollow | nonBlock) : fs.constants.O_RDONLY,
+    );
   } catch (error) {
     if (error && (error.code === "ELOOP" || error.code === "EMLINK")) {
       throw new SafeInputError("input must not be a symlink");
@@ -618,11 +646,14 @@ function readFileWithinLimit(file) {
     throw error;
   }
   try {
-    const stat = fs.fstatSync(descriptor);
+    const stat = fs.fstatSync(descriptor, { bigint: true });
     if (!stat.isFile()) {
       throw new SafeInputError("input must be a regular file");
     }
-    if (stat.size > LIMITS.inputBytes) {
+    if (lstatBefore !== null && (stat.dev !== lstatBefore.dev || (lstatBefore.ino !== 0n && stat.ino !== lstatBefore.ino))) {
+      throw new SafeInputError("input identity changed during open");
+    }
+    if (stat.size > BigInt(LIMITS.inputBytes)) {
       throw new SafeInputError(`input exceeds ${LIMITS.inputBytes} byte limit`);
     }
 
@@ -637,6 +668,12 @@ function readFileWithinLimit(file) {
         throw new SafeInputError(`input exceeds ${LIMITS.inputBytes} byte limit`);
       }
       chunks.push(Buffer.from(buffer.subarray(0, count)));
+    }
+    if (lstatBefore !== null) {
+      const statAfter = fs.fstatSync(descriptor, { bigint: true });
+      if (!statAfter.isFile() || statAfter.dev !== stat.dev || statAfter.ino !== stat.ino || statAfter.size !== BigInt(bytesRead)) {
+        throw new SafeInputError("input changed while reading");
+      }
     }
     try {
       return UTF8_DECODER.decode(Buffer.concat(chunks, bytesRead));

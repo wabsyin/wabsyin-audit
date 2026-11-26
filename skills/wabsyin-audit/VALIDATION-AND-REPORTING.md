@@ -113,6 +113,8 @@ Run:
 ```sh
 node <skill-dir>/validate-findings.cjs <output-dir>/findings.json
 node <skill-dir>/validate-coverage-ledger.cjs <output-dir>/coverage-ledger.json
+# When Track 2 (Compliance & Launch Readiness) is active:
+node <skill-dir>/validate-compliance.cjs <output-dir>/compliance-findings.json
 ```
 
 Fix every structural and semantic error before continuing. The findings validator rejects input beyond 5 MiB, 1,000 top-level findings, or 64 nesting levels, and caps reported error output at 100 messages. Validator success proves format and ledger consistency only.
@@ -184,3 +186,10 @@ For every unresolved record, copy the source trace, verified evidence, exact blo
 HTTP is one possible native interface, not the default. A library finding may use a function call, a parser a fixture, a CLI a command, a desktop app an IPC or file action, and infrastructure a locally rendered policy. Do not require an endpoint, external account, or live environment that the target does not have.
 
 Keep the report proportional to the evidence. A clean run may have zero confirmed records. State that result and the remaining coverage/validation limits without inventing LOW findings.
+
+#### `LAUNCH-READINESS.md` and `VIBE-CODER-ACTION-PLAN.md` (when Track 2 runs)
+
+When Track 2 ([COMPLIANCE-WORKFLOW.md](COMPLIANCE-WORKFLOW.md)) is active, derive two additional builder-friendly files from validated `compliance-findings.json` and `findings.json`:
+
+- **`LAUNCH-READINESS.md`**: 5-Gate Go/No-Go Launch Scorecard (**Code Security**, **India DPDP Act & Privacy**, **Payment Gateway & KYC Pages**, **Mobile App Store & Play Store**, **Production Launch Hygiene**), detailed `blocker`/`high`/`medium` compliance failures with `file:line` evidence, passed checks table, and `needs_manual_check` external dashboard/DNS checklist.
+- **`VIBE-CODER-ACTION-PLAN.md`**: Plain-language prioritized roadmap organized into (1) *Fix Immediately Before Going Live*, (2) *Fix Before Scaling / Marketing*, and (3) *10-Minute Manual Dashboard Checklist*, complete with ready-to-paste prompts for the developer's coding agent and non-placeholder policy section outlines.

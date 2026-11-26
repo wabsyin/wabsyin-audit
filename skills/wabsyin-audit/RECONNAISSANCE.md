@@ -54,7 +54,19 @@ Read tests, build definitions, manifests, packaging, and maintained environment 
 7. Whether trusted parent-side code can promote predeclared scratch files with path-confined no-follow descriptor traversal, nonblocking regular-file checks, no-follow traversal of every destination parent, exclusive regular-file destination creation, and explicit per-file and cumulative size bounds. Missing promotion controls block use of scratch files as evidence.
 ```
 
-Add focused reconnaissance agents for materially distinct deployment modes or subsystems that these four do not map. Do not silently omit them: if the budget gate in `SKILL.md` blocks a focused agent, launch nothing for it, seed the unmapped area as a `deferred` ledger unit with reason `budget_cannot_reserve_critics_and_validation`, and disclose the gap in the report.
+**Agent 1e: BaaS, payments, personal-data flows, legal routes, and mobile/store surfaces (when web, mobile, SaaS, AI, or user-data code exists)**
+
+```text
+Read schemas, migrations, BaaS configs, payment integrations, public routes, footer/checkout components, and mobile manifests. Return:
+1. BaaS & framework boundary surfaces: Supabase tables/RLS migrations/RPC/Storage, Firebase rules/functions, `"use server"` Server Actions, public env prefixes (`NEXT_PUBLIC_`, `VITE_`, `EXPO_PUBLIC_`), and paid external APIs (LLM, SMS OTP, email, media).
+2. Payment & billing surfaces: integrated gateways (Razorpay, Cashfree, PhonePe, PayU, Stripe, LemonSqueezy, Paddle, IAP/RevenueCat), checkout/verify/webhook routes, wallet/credit/subscription tables.
+3. Personal-data inventory (for DPDP Act / privacy): PII fields stored in schemas, analytics/ad pixels, AI prompt forwarding, consent checkboxes/columns, and account-deletion endpoints.
+4. Public legal & KYC routes: presence, footer/checkout link targets, and auth-middleware / `robots.txt` status for Privacy Policy, Terms, Refund/Cancellation, Shipping/Delivery, Contact Us, Pricing, and Account Deletion pages.
+5. Mobile targets (if any): Expo/React Native/Flutter/Android/iOS manifests, `PrivacyInfo.xcprivacy`, social login providers, and token storage libraries.
+Return only source facts with repository-relative file:line references.
+```
+
+Add focused reconnaissance agents for materially distinct deployment modes or subsystems that these agents do not map. Do not silently omit them: if the budget gate in `SKILL.md` blocks a focused agent, launch nothing for it, seed the unmapped area as a `deferred` ledger unit with reason `budget_cannot_reserve_critics_and_validation`, and disclose the gap in the report.
 
 ## Prior-run input
 

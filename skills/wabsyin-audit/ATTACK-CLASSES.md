@@ -25,6 +25,12 @@ Use `confirmed` only when source evidence and bounded validation establish the f
 > **Data-isolation and lifecycle targets** (multi-tenant stores, caches/search, object links, analytics, export/backup, migration, deletion, retention, or restore): use [DATA-ISOLATION-AND-LIFECYCLE.md](DATA-ISOLATION-AND-LIFECYCLE.md).
 >
 > **Desktop, mobile, and local-IPC targets** (native apps, deep links, webview bridges, exported components, privileged helpers, local daemons, Unix sockets/XPC/Binder/D-Bus): use [DESKTOP-MOBILE-AND-LOCAL-IPC.md](DESKTOP-MOBILE-AND-LOCAL-IPC.md).
+>
+> **Vibe-coded full-stack, BaaS, and paid-API targets** (Next.js/Remix/SvelteKit/Astro Server Actions & RSCs, Vite/Expo client env vars, Supabase RLS/RPC/Storage, Firebase rules/functions, Clerk/Auth.js, presigned uploads, or OpenAI/Anthropic/Gemini/SMS/email spend endpoints): use [VIBE-CODING-AND-BAAS.md](VIBE-CODING-AND-BAAS.md).
+>
+> **Payment, checkout, subscription, wallet, and credit targets** (Razorpay, Cashfree, PhonePe, PayU, Paytm, Stripe, LemonSqueezy, Paddle, Apple/Google IAP, RevenueCat, webhooks, promo codes, referrals, or usage credits): use [PAYMENT-AND-BILLING-SECURITY.md](PAYMENT-AND-BILLING-SECURITY.md).
+>
+> *(Note: For mandatory legal/KYC pages, India DPDP Act 2023 privacy compliance, Play Store / App Store policy blockers, and production launch hygiene, run Track 2 via [COMPLIANCE-WORKFLOW.md](COMPLIANCE-WORKFLOW.md) into `compliance-findings.json` — never mix missing legal pages into `findings.json`.)*
 
 **Injection** (subagent_type: `general`)
 Trace untrusted input from entry point to dangerous sink. What counts as a "dangerous sink" depends on the application:

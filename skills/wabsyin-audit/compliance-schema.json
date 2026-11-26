@@ -1,0 +1,275 @@
+{
+  "$comment": "Top-level contract for compliance-findings.json (Track 2). validate-compliance.cjs interprets and validates this schema directly.",
+  "type": "array",
+  "items": {
+    "oneOf": [
+      {
+        "type": "object",
+        "description": "A compliance, legal-page, store-policy, or launch-hygiene requirement verified in repository source.",
+        "properties": {
+          "verdict": {
+            "type": "string",
+            "const": "pass"
+          },
+          "check_id": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^(?:DPDP|PGKYC|MOBSTORE|HYGIENE)-[0-9]{2}[A-Z]?$"
+          },
+          "framework": {
+            "type": "string",
+            "enum": ["DPDP_2023", "PAYMENT_KYC", "MOBILE_STORES", "LAUNCH_HYGIENE"]
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "visibleContent": true
+          },
+          "summary": {
+            "type": "string",
+            "minLength": 1,
+            "visibleContent": true
+          },
+          "evidence": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "type": "object",
+              "properties": {
+                "file": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "line": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "description": {
+                  "type": "string",
+                  "minLength": 1,
+                  "visibleContent": true
+                }
+              },
+              "required": ["file", "line", "description"],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": ["verdict", "check_id", "framework", "title", "summary", "evidence"],
+        "additionalProperties": false
+      },
+      {
+        "type": "object",
+        "description": "A source-verified missing page, missing clause, placeholder defect, store rejection blocker, or launch-hygiene gap.",
+        "properties": {
+          "verdict": {
+            "type": "string",
+            "const": "fail"
+          },
+          "check_id": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^(?:DPDP|PGKYC|MOBSTORE|HYGIENE)-[0-9]{2}[A-Z]?$"
+          },
+          "framework": {
+            "type": "string",
+            "enum": ["DPDP_2023", "PAYMENT_KYC", "MOBILE_STORES", "LAUNCH_HYGIENE"]
+          },
+          "priority": {
+            "type": "string",
+            "enum": ["blocker", "high", "medium", "advisory"]
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "visibleContent": true
+          },
+          "summary": {
+            "type": "string",
+            "minLength": 1,
+            "visibleContent": true
+          },
+          "requirement": {
+            "type": "string",
+            "minLength": 1,
+            "visibleContent": true
+          },
+          "evidence": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "type": "object",
+              "properties": {
+                "file": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "line": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "description": {
+                  "type": "string",
+                  "minLength": 1,
+                  "visibleContent": true
+                }
+              },
+              "required": ["file", "line", "description"],
+              "additionalProperties": false
+            }
+          },
+          "remediation": {
+            "type": "object",
+            "properties": {
+              "summary": {
+                "type": "string",
+                "minLength": 1,
+                "visibleContent": true
+              },
+              "steps": {
+                "type": "array",
+                "minItems": 1,
+                "uniqueItems": true,
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "visibleContent": true
+                }
+              },
+              "target_paths": {
+                "type": "array",
+                "uniqueItems": true,
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            },
+            "required": ["summary", "steps"],
+            "additionalProperties": false
+          }
+        },
+        "required": ["verdict", "check_id", "framework", "priority", "title", "summary", "requirement", "evidence", "remediation"],
+        "additionalProperties": false
+      },
+      {
+        "type": "object",
+        "description": "An operational, dashboard, DNS, or store-console check outside repository source code.",
+        "properties": {
+          "verdict": {
+            "type": "string",
+            "const": "needs_manual_check"
+          },
+          "check_id": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^(?:DPDP|PGKYC|MOBSTORE|HYGIENE)-[0-9]{2}[A-Z]?$"
+          },
+          "framework": {
+            "type": "string",
+            "enum": ["DPDP_2023", "PAYMENT_KYC", "MOBILE_STORES", "LAUNCH_HYGIENE"]
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "visibleContent": true
+          },
+          "summary": {
+            "type": "string",
+            "minLength": 1,
+            "visibleContent": true
+          },
+          "manual_verification": {
+            "type": "string",
+            "minLength": 1,
+            "visibleContent": true
+          },
+          "evidence": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+              "type": "object",
+              "properties": {
+                "file": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "line": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "description": {
+                  "type": "string",
+                  "minLength": 1,
+                  "visibleContent": true
+                }
+              },
+              "required": ["file", "line", "description"],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": ["verdict", "check_id", "framework", "title", "summary", "manual_verification"],
+        "additionalProperties": false
+      },
+      {
+        "type": "object",
+        "description": "A compliance domain or check proved inapplicable from repository source.",
+        "properties": {
+          "verdict": {
+            "type": "string",
+            "const": "not_applicable"
+          },
+          "check_id": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^(?:DPDP|PGKYC|MOBSTORE|HYGIENE)-[0-9]{2}[A-Z]?$"
+          },
+          "framework": {
+            "type": "string",
+            "enum": ["DPDP_2023", "PAYMENT_KYC", "MOBILE_STORES", "LAUNCH_HYGIENE"]
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "visibleContent": true
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1,
+            "visibleContent": true
+          },
+          "evidence": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "type": "object",
+              "properties": {
+                "file": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "line": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "description": {
+                  "type": "string",
+                  "minLength": 1,
+                  "visibleContent": true
+                }
+              },
+              "required": ["file", "line", "description"],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": ["verdict", "check_id", "framework", "title", "reason", "evidence"],
+        "additionalProperties": false
+      }
+    ]
+  }
+}

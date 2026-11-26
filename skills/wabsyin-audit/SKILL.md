@@ -1,20 +1,26 @@
 ---
-name: security-audit
-description: Security guidance and vulnerability review for codebases, APIs, services, CLI tools, libraries, and daemons. Use for security questions, focused reviews, vulnerability research, security audits, or pen tests. Run the complete workflow only for explicit codebase audit or pen-test requests, full/comprehensive/end-to-end reviews, or requested report artifacts.
+name: wabsyin-audit
+description: Wabsyin Audit — End-to-end security vulnerability, Vibe-Coder BaaS/framework, payment security, India DPDP Act privacy compliance, Payment Gateway KYC pages (Razorpay/Cashfree/PhonePe/Stripe), Mobile App Store/Play Store readiness, and production launch-hygiene audit skill for web, mobile, AI, API, and cloud codebases. Use for security questions, focused reviews, pre-launch vibe-coder checks, DPDP/payment/store compliance audits, or full adversarial codebase security audits.
 ---
 
-# Security Audit
+# Wabsyin Audit — Security, Compliance & Launch-Readiness Skill
 
-Find vulnerabilities that violate a real trust boundary, then give owners the source evidence, safe reproduction, priority, and smallest effective fix. This is a defensive, source-first workflow. A candidate without a concrete affected principal, resource, or security outcome is not a confirmed finding.
+Find real vulnerabilities that violate a concrete trust boundary (**Track 1**), and deterministically audit regulatory, payment-gateway KYC, mobile app-store, and production launch readiness (**Track 2**) — giving builders exact source evidence, safe reproduction, priority, and copy-pasteable fixes.
+
+Keep the two tracks strictly separated:
+- **Track 1 (Adversarial Security Engine):** Source-first vulnerability discovery and disproof. A security candidate without a concrete affected principal, resource, or boundary outcome is never a confirmed vulnerability in `findings.json`.
+- **Track 2 (Deterministic Compliance & Launch Engine):** Source-verified readiness checks in `compliance-findings.json` covering **India DPDP Act (2023 & Rules)**, **Payment Gateway Mandatory Legal/KYC Pages**, **Google Play & Apple App Store Policies**, and **Production Launch Hygiene** via [COMPLIANCE-WORKFLOW.md](COMPLIANCE-WORKFLOW.md).
 
 ## Operating modes
 
 This skill is guidance by default. Loading it does not authorize the complete audit workflow or file creation.
 
-- **Guidance mode**: For security questions, focused reviews, methodology, triage, or investigation of specific findings, use only the relevant parts of this skill. Do not automatically run all six phases, create an output directory, or write audit artifacts. You may launch focused agents when useful; they return results to the current task.
-- **Full audit mode**: Use the complete workflow when the user explicitly asks to audit or pen-test a codebase, asks for a full, comprehensive, or end-to-end security review, or requests report artifacts. Run all six phases and write the files defined below.
+- **Guidance mode**: For security, DPDP privacy, payment-gateway KYC, mobile store, or launch-hygiene questions, focused reviews, methodology, triage, or investigation of specific findings, use only the relevant parts of this skill and its companions. Do not automatically run all phases, create an output directory, or write audit artifacts.
+- **Compliance & launch mode (Track 2 standalone)**: When the user specifically asks to check **DPDP Act / Privacy Policy**, **Payment Gateway / Razorpay / Stripe required pages**, **App Store / Play Store submission readiness**, or **missing launch pages/checklist** without requesting a full vulnerability pen-test, run [COMPLIANCE-WORKFLOW.md](COMPLIANCE-WORKFLOW.md) and write `compliance-findings.json`, `LAUNCH-READINESS.md`, and `VIBE-CODER-ACTION-PLAN.md` (validated by `validate-compliance.cjs`).
+- **Quick vibe-check mode (`quick` profile + Track 2)**: When a vibe coder or indie builder asks for a fast pre-launch check ("check if my project is safe and ready to launch"), run Track 1 with the `quick` profile (prioritizing [VIBE-CODING-AND-BAAS.md](VIBE-CODING-AND-BAAS.md), [PAYMENT-AND-BILLING-SECURITY.md](PAYMENT-AND-BILLING-SECURITY.md), and `Obvious things`) **plus** Track 2 ([COMPLIANCE-WORKFLOW.md](COMPLIANCE-WORKFLOW.md)), producing both security and launch-readiness artifacts.
+- **Full audit mode (`standard` or `deep` + Track 2)**: Use the complete workflow when the user explicitly asks to audit or pen-test a codebase, asks for a full, comprehensive, or end-to-end security and launch review, or requests complete report artifacts. Run all six Track 1 phases **and** Track 2 ([COMPLIANCE-WORKFLOW.md](COMPLIANCE-WORKFLOW.md)) unless the user explicitly scopes Track 2 out (e.g., pure C library or CLI daemon with no web/mobile/user-data surface).
 
-If the request could mean either mode, ask one focused question before creating files or starting the complete workflow.
+If the request could mean either guidance or artifact-writing audit mode, ask one focused question before creating files or starting the complete workflow.
 
 ## Platform terminology
 
@@ -48,7 +54,7 @@ In full audit mode, resolve these values before reconnaissance:
 - **Skill directory**: the absolute directory containing this `SKILL.md`.
 - **Target**: the absolute repository root under review.
 - **Repo name**: a stable repository identifier from the directory or local Git remote.
-- **Output directory**: a new writable directory outside the target, defaulting to `~/security-audit-skill/<repo-name>/run-<N>`, where `<N>` is the next unused integer. Use a directory inside the target only when the user explicitly selects it and the parent verifies that version control ignores the whole directory. Otherwise stop and request an external path.
+- **Output directory**: a new writable directory outside the target, defaulting to `~/wabsyin-audit/<repo-name>/run-<N>`, where `<N>` is the next unused integer. Use a directory inside the target only when the user explicitly selects it and the parent verifies that version control ignores the whole directory. Otherwise stop and request an external path.
 - **Source ref**: the reviewed commit and whether the worktree is dirty. Do not treat unreviewed generated or modified files as another revision.
 
 ### Write isolation
@@ -59,9 +65,12 @@ The parent creates and is the only writer of shared run files:
 - `architecture.md`
 - `coverage-ledger.json`
 - `findings.json`
+- `compliance-findings.json` (when Track 2 runs)
 - `REPORT.md`
 - `FINDINGS-DETAIL.md`
 - `NEEDS-VALIDATION.md`
+- `LAUNCH-READINESS.md` (when Track 2 runs)
+- `VIBE-CODER-ACTION-PLAN.md` (when Track 2 or vibe-check runs)
 
 Each hunter or verifier receives a unique root under `<output-dir>/agents/<agent-id>/`, with separate `scratch/` and `artifacts/` directories. Canonical agent IDs match `^[a-z0-9][a-z0-9_-]{0,63}$` and must not equal a Windows device name such as `con`, `prn`, `aux`, `nul`, `com1` through `com9`, or `lpt1` through `lpt9`. Lowercase IDs prevent case-fold collisions. The agent and every target-controlled process may write only to `scratch/`; retained `artifacts/` is parent-owned, is never exposed to the sandbox, and is writable only by trusted parent-side promotion code. Agents may not change shared files, target source, retained artifacts, or another agent's directory. Do not use `/tmp` or the host home directory as a writable fallback.
 
@@ -167,16 +176,16 @@ For each confirmed finding, identify the invariant the code must enforce and the
 
 ## Full audit workflow
 
-In full audit mode, follow all six phases in order:
+In full audit mode, follow all six Track 1 phases in order, and run Track 2 ([COMPLIANCE-WORKFLOW.md](COMPLIANCE-WORKFLOW.md)) alongside Phases 2–6 whenever web, mobile, SaaS, AI, payment, or user-data surfaces exist:
 
-1. **Reconnaissance** — map the source, trust boundaries, local build paths, companion selections, prior evidence, and initial deterministic coverage ledger with [RECONNAISSANCE.md](RECONNAISSANCE.md).
-2. **Coverage-led hunting waves** — assign isolated hunters from the ledger and collect structured candidate results with [HUNTING.md](HUNTING.md), [ATTACK-CLASSES.md](ATTACK-CLASSES.md), and the selected domain companions.
-3. **Candidate validation** — consolidate fingerprints and give every candidate to a fresh source verifier as defined in [VALIDATION-AND-REPORTING.md](VALIDATION-AND-REPORTING.md).
-4. **Structured output** — write all final `confirmed`, `needs_validation`, and `rejected` records to `findings.json`; validate it with `report-schema.json` and `validate-findings.cjs`, and validate the coverage claim with `validate-coverage-ledger.cjs`.
+1. **Reconnaissance** — map the source, trust boundaries, local build paths, PII/payment/legal/mobile surfaces, companion selections, prior evidence, and initial deterministic coverage ledger with [RECONNAISSANCE.md](RECONNAISSANCE.md).
+2. **Coverage-led hunting waves (+ Track 2 compliance auditors)** — assign isolated Track 1 hunters from the ledger with [HUNTING.md](HUNTING.md), [ATTACK-CLASSES.md](ATTACK-CLASSES.md), and selected domain companions (including [VIBE-CODING-AND-BAAS.md](VIBE-CODING-AND-BAAS.md) and [PAYMENT-AND-BILLING-SECURITY.md](PAYMENT-AND-BILLING-SECURITY.md)); in parallel, launch read-only Track 2 compliance auditors per [COMPLIANCE-WORKFLOW.md](COMPLIANCE-WORKFLOW.md).
+3. **Candidate validation** — consolidate fingerprints and give every Track 1 security candidate to a fresh source verifier as defined in [VALIDATION-AND-REPORTING.md](VALIDATION-AND-REPORTING.md); spot-verify Track 2 `blocker` and `high` compliance failures.
+4. **Structured output** — write all final `confirmed`, `needs_validation`, and `rejected` security records to `findings.json` and validate with `report-schema.json` and `validate-findings.cjs`; validate the coverage claim with `validate-coverage-ledger.cjs`; when Track 2 runs, write `compliance-findings.json` and validate with `compliance-schema.json` and `validate-compliance.cjs`.
 5. **Independent record verification** — use fresh agents to verify final source claims and reconcile corrections or state changes.
-6. **Target-neutral report** — derive `REPORT.md`, `FINDINGS-DETAIL.md`, and `NEEDS-VALIDATION.md` from the final records, with no live-probe instructions.
+6. **Target-neutral & launch-readiness reports** — derive `REPORT.md`, `FINDINGS-DETAIL.md`, and `NEEDS-VALIDATION.md` from verified Track 1 records, plus `LAUNCH-READINESS.md` and `VIBE-CODER-ACTION-PLAN.md` when Track 2 runs, with no live-probe instructions.
 
-Do not end the run before one of exactly two terminal states: (a) all Phase 6 artifacts are written and both validators pass, or (b) `run_status: "incomplete"` is recorded with its exact reason and the gap is disclosed in the report. Never stop mid-phase.
+Do not end the run before one of exactly two terminal states: (a) all required Phase 6 artifacts are written and all applicable validators (`validate-findings.cjs`, `validate-coverage-ledger.cjs`, and `validate-compliance.cjs`) pass, or (b) `run_status: "incomplete"` is recorded with its exact reason and the gap is disclosed in the report. Never stop mid-phase.
 
 ## Anti-patterns
 
